@@ -1,3 +1,4 @@
+# Calculating start date and length of churn using LEAD navigation function
 WITH duplicates AS (
   SELECT
     *,
