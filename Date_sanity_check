@@ -1,0 +1,5 @@
+SELECT
+  conversation_id, exchange_id,created_at,start_on, end_on,finalized_at,night_count,
+  DATE_DIFF(finalized_at,created_at, DAY) AS created_finalized_diff,
+FROM `home-exange.home_exchange.date_type_change`
+WHERE DATE_DIFF(finalized_at,created_at, DAY)<0
