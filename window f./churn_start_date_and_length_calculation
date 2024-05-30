@@ -1,0 +1,79 @@
+WITH duplicates AS (
+  SELECT
+    *,
+    ROW_NUMBER() OVER (PARTITION BY 
+          EXTRACT(YEAR FROM subscription_date),
+          user_id 
+          ORDER BY subscription_date DESC) AS row_num
+  FROM `home-exange.home_exchange.subscription_no_dublicates`
+),
+
+duplicates_filtered as (
+SELECT
+ *,
+FROM duplicates
+WHERE row_num <= 1),
+
+a as (select 
+*,
+CAST(subscription_date as date) AS sub_date,
+LEAD(CAST(subscription_date as date), 1) OVER (
+  PARTITION BY user_id
+  ORDER BY CAST(subscription_date as date)) as next_sub_date,
+from duplicates_filtered
+),
+
+b as (select 
+*,
+DATE_DIFF(next_sub_date, sub_date, day)  as diff
+from a),
+
+c as (select 
+*,
+CASE 
+  WHEN diff <= 366 then NULL
+  WHEN diff > 366 then diff - 365
+  END as churn_length
+from b),
+
+d as (select 
+*,
+CASE
+  WHEN next_sub_date is NULL then date_add(sub_date, INTERVAL 365 DAY)  
+  WHEN churn_length is NOT NULL then date_add(sub_date, INTERVAL 365 DAY)
+  WHEN churn_length is NULL then null
+ 
+  END as churn_start
+from c)
+
+select 
+subscription_date,
+user_id,
+renew,
+first_subscription_date,
+first_subscription,
+referral,
+promotion,
+payment3x,
+payment2,
+payment3,
+country,
+region,
+department,
+city,
+row_num,
+sub_date,
+next_sub_date,
+diff,
+churn_length,
+CASE 
+  WHEN churn_start > CAST("2021-10-31" as date) then NULL
+  ELSE churn_start
+END as churn_start_date,
+CASE
+  WHEN churn_start >= CAST("2021-10-31" as date) then 1
+  WHEN churn_start < CAST("2020-10-31" as date) then NULL
+  WHEN churn_start >= CAST("2020-10-31" as date) AND churn_start < CAST("2021-10-31" as date) then 0
+  END as is_user_2021_10_31,
+
+  from d
