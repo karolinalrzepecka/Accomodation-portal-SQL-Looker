@@ -5,5 +5,5 @@ Extensively analyzed the occurring customer churn problem of online platform for
 house exchange
 Calculated the main metrics using SQL and Big Query
 Created dashboards for main results visualization in Looker
-Successfully cooperated in a remote team of 4, we used SQL, Python, and Looker to
+Successfully cooperated in a remote team of 4, we used SQL, Python, dbt and Looker to
 Peached the results during public Demo Day: recording of a presentation (2:34)
